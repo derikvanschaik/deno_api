@@ -3,6 +3,7 @@ import "https://deno.land/x/dotenv/load.ts";
 import router from './api/author.ts'
 
 
+const port = Deno.env.get("PORT") || 8000;
 const app = new Application();
 
 app.use(router.allowedMethods());
@@ -18,4 +19,4 @@ app.addEventListener('listen', () => {
   console.log(`Listening on: localhost:${port}`);
 });
 
-addEventListener("fetch", app.fetchEventHandler());
+await app.listen({ port });
