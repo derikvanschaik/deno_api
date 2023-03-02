@@ -4,7 +4,7 @@ import authorRouter from './author/router.ts'
 import quotesRouter from './quote/router.ts';
 
 
-const port = Deno.env.get("PORT") || 8000;
+const port = Deno.env.get("PORT") || 3000;
 const app = new Application();
 
 app.use(authorRouter.allowedMethods());
