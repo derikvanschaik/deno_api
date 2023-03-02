@@ -16,21 +16,9 @@ router.get('/authors', async (ctx) => {
   ctx.response.body = authors;
 });
 
-router.get('/authors/:authorID', async (ctx) =>{
-    const author = await getAuthor(ctx.params.authorID)
+router.get('/authors/:authorName', async (ctx) =>{
+    const author = await getAuthor(ctx.params.authorName)
     ctx.response.body = { author }
 })
-
-// router.post('/', (ctx) => {
-//   ctx.response.body = 'Received a POST HTTP method';
-// });
-
-// router.put('/', (ctx) => {
-//   ctx.response.body = 'Received a PUT HTTP method';
-// });
-
-// router.delete('/', (ctx) => {
-//   ctx.response.body = 'Received a DELETE HTTP method';
-// });
 
 export default router
