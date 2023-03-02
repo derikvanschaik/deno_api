@@ -1,5 +1,5 @@
 import { Router, helpers } from 'https://deno.land/x/oak/mod.ts';
-import { getAuthor, getAuthors } from '../db/db.ts';
+import { getAuthor, getAuthors } from './db.ts';
 
 const router = new Router();
 
