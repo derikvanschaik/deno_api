@@ -37,5 +37,6 @@ const getQuotes = async (authorName: string, page: number, limit: number, includ
 
 }
 
-export { getQuotes }
+const service = { getQuotes }
+export default service
 

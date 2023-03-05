@@ -59,5 +59,6 @@ const getAuthors= async (page: number, limit: number, sort: number, includes: st
 
 }
 
-export { getAuthor, getAuthors }
+const service = { getAuthor, getAuthors }
+export default service;
 
