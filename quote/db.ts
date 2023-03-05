@@ -10,7 +10,10 @@ export interface QuoteSchema {
     author: string;
     quote: string;
 }
-
+// this database service
+export interface QuoteService {
+    getQuotes: (authorName: string, page: number, limit: number, includes: string) => Promise<any>;
+}
 
 const getQuotes = async (authorName: string, page: number, limit: number, includes: string) =>{
     const client = await connectToDB();
@@ -37,6 +40,6 @@ const getQuotes = async (authorName: string, page: number, limit: number, includ
 
 }
 
-const service = { getQuotes }
+const service:QuoteService = { getQuotes }
 export default service
 

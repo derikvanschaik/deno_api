@@ -1,13 +1,21 @@
 import { superoak } from "https://deno.land/x/superoak@4.7.0/mod.ts";
 import createApp from './app/createApp.ts';
+// types 
+import { AuthorService } from "./author/db.ts";
+import { QuoteService } from "./quote/db.ts";
 
-const quoteService = { 
+const quoteService:QuoteService = { 
     getQuotes: async function(authorName:any, page:any, limit:any, includes:any){
         return [{ quote: "bla", author: "James Gordo"}]
     }
 };
-const authorService = {
-
+const authorService:AuthorService = {
+    getAuthors: async function() {
+        return null;
+    },
+    getAuthor: async function(){
+        return null;
+    }
 };
 const app = await createApp({ quoteService, authorService});
 

@@ -1,5 +1,4 @@
 import { Router, helpers } from 'https://deno.land/x/oak/mod.ts';
-// import { getQuotes } from './db.ts';
 
 export default function createRouter(db: any){
     const router = new Router();

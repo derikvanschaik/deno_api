@@ -10,6 +10,11 @@ export interface QuoteSchema {
     author: string;
     quote: string;
 }
+// this database service
+export interface AuthorService {
+    getAuthor: (authorName: string) => Promise<any>;
+    getAuthors: (page: number, limit: number, sort: number, includes: string) => Promise<any>;
+}
 
 const getAuthor = async (authorName: string) =>{
     const client = await connectToDB();
@@ -52,13 +57,13 @@ const getAuthors= async (page: number, limit: number, sort: number, includes: st
             { "$limit": limit }
         )
     }
-    let result = await quotes.aggregate(stages);
+    let result: any = await quotes.aggregate(stages);
     result = await result.toArray();
     await client.close();
     return result;
 
 }
 
-const service = { getAuthor, getAuthors }
+const service: AuthorService = { getAuthor, getAuthors }
 export default service;
 
