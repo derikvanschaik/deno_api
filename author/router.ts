@@ -7,13 +7,17 @@ export default function createRouter(db: any){
     
     router.get('/authors', async (ctx) => {
       let {sort, page, limit, includes } = helpers.getQuery(ctx);
+      let pageParam: number | undefined;
+      let limitParam: number | undefined;
+      let sortParam: number | undefined;
+
       if( page !== undefined && limit !== undefined){
-          [page, limit] = [parseInt(page), parseInt(limit)]
+          [pageParam, limitParam] = [parseInt(page), parseInt(limit)]
       }
       if( sort !== undefined){
-          sort = parseInt(sort)
+          sortParam = parseInt(sort)
       }
-      const authors = await getAuthors(page, limit, sort, includes);
+      const authors = await getAuthors(pageParam, limitParam, sortParam, includes);
       ctx.response.body = authors;
     });
     

@@ -2,15 +2,15 @@ import { Application } from 'https://deno.land/x/oak/mod.ts';
 import createAuthorRouter from '../author/router.ts'
 import createQuotesRouter from '../quote/router.ts';
 
-export default async function createApp(services){
-    const {authorService, quotesService } = services;
+export default async function createApp(services: any){
+    const {authorService, quoteService } = services;
     const app = new Application();
     
     const authorRouter = createAuthorRouter(authorService);
     app.use(authorRouter.allowedMethods());
     app.use(authorRouter.routes());
     
-    const quotesRouter = createQuotesRouter(quotesService);
+    const quotesRouter = createQuotesRouter(quoteService);
     app.use(quotesRouter.allowedMethods());
     app.use(quotesRouter.routes());
     
