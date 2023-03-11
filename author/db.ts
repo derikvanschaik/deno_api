@@ -1,69 +1,48 @@
-import {
-    ObjectId
-  } from "https://deno.land/x/mongo@v0.31.1/mod.ts";
 import connectToDB from "../db/connect.ts";
+import { replaceQueryPlaceholders } from "../utils.ts";
 
-
-// Defining schema 
-export interface QuoteSchema {
-    _id: ObjectId;
-    author: string;
-    quote: string;
-}
 // this database service
 export interface AuthorService {
-    getAuthor: (authorName: string) => Promise<any>;
     getAuthors: (page: number, limit: number, sort: number, includes: string) => Promise<any>;
 }
 
-const getAuthor = async (authorName: string) =>{
-    const client = await connectToDB();
-    const db = client.database("test");
-    const quotes = db.collection<QuoteSchema>("quotes");
-    const author = await quotes.findOne({
-        author: authorName
-      },
-      {projection: {author: 1}})
-    await client.close();
-    return author;
-}
 
 const getAuthors= async (page: number, limit: number, sort: number, includes: string) =>{
     const client = await connectToDB();
-    const db = client.database("test");
-    const quotes = db.collection<QuoteSchema>("quotes");
 
-    const stages = [];
+    const hasFilter = includes !== undefined;
+    const hasSort = sort !== undefined;
+    const hasLimit = limit !== undefined;
+    const hasOffset = page !== undefined;
 
-    if(includes !== undefined){
-        stages.push( 
-            {"$match": { author : {'$regex' : includes, '$options' : 'i'}}}
-        )
+    let query = `
+    SELECT author_name, CAST(count(author_name) AS INT)
+    FROM quotes
+    JOIN authors ON quotes.author_id = authors.author_id
+    ${hasFilter? 'WHERE author_name LIKE ?' : ''}
+    GROUP BY author_name
+    ${hasSort? 'ORDER BY author_name ' + (sort === 1? 'DESC': 'ASC')  : ''}
+    ${hasLimit? 'LIMIT ?': ''}
+    ${hasOffset? 'OFFSET ?' : ''}
+    `
+    const params = [];
+    if(hasFilter){
+        params.push('%'+ includes+ '%');
     }
-    // grouping by author 
-    stages.push(
-        { "$group": { "_id": "$author" } }
-    )
-    if (sort === 0 || sort === 1){
-        stages.push(
-            { "$sort": { "_id": sort === 0? 1 : -1 }}
-        )
+    if(hasLimit){
+        params.push(limit);
     }
-    if(page !== undefined && limit !== undefined){
-        stages.push(
-            { "$skip": ( page ) * limit}
-        )
-        stages.push(
-            { "$limit": limit }
-        )
+    if(hasOffset){
+        params.push(page);
     }
-    let result: any = await quotes.aggregate(stages);
-    result = await result.toArray();
-    await client.close();
-    return result;
+    query = replaceQueryPlaceholders(query, params)
+    
+    const result = await client.queryArray(query, params)
+    await client.end()
+    return result.rows;
 
 }
 
-const service: AuthorService = { getAuthor, getAuthors }
+const service: AuthorService = {  getAuthors }
 export default service;
 
