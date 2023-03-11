@@ -28,8 +28,8 @@ const getQuotes = async (page: number, limit: number, includes: string) =>{
     let query = 'SELECT author_name, quote FROM quotes JOIN authors on authors.author_id = quotes.author_id';
     const params = [];
     if(includes !== undefined){
-        query += " WHERE author_name LIKE ?"
-        params.push('%'+ includes+ '%');
+        query += " WHERE quote ~* ?"
+        params.push(includes);
     }
     if(limit !== undefined){
         query += ' LIMIT ? '

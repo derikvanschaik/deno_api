@@ -19,7 +19,7 @@ const getAuthors= async (page: number, limit: number, sort: number, includes: st
     SELECT author_name, CAST(count(author_name) AS INT)
     FROM quotes
     JOIN authors ON quotes.author_id = authors.author_id
-    ${hasFilter? 'WHERE author_name LIKE ?' : ''}
+    ${hasFilter? 'WHERE author_name ~* ?' : ''}
     GROUP BY author_name
     ${hasSort? 'ORDER BY author_name ' + (sort === 1? 'DESC': 'ASC')  : ''}
     ${hasLimit? 'LIMIT ?': ''}
@@ -27,7 +27,7 @@ const getAuthors= async (page: number, limit: number, sort: number, includes: st
     `
     const params = [];
     if(hasFilter){
-        params.push('%'+ includes+ '%');
+        params.push(includes);
     }
     if(hasLimit){
         params.push(limit);
