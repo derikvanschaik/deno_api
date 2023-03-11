@@ -3,11 +3,11 @@ import { replaceQueryPlaceholders } from "../utils.ts";
 
 // this database service
 export interface AuthorService {
-    getAuthors: (page: number, limit: number, sort: number, includes: string) => Promise<any>;
+    getAuthors: (page: number, limit: number, sort: number,sortBy: string,  includes: string) => Promise<any>;
 }
 
-
-const getAuthors= async (page: number, limit: number, sort: number, includes: string) =>{
+// (pageParam, limitParam, sortTypeParam, sortByParam, includes)
+const getAuthors= async (page: number, limit: number, sort: number,sortBy: string, includes: string) =>{
     const client = await connectToDB();
 
     const hasFilter = includes !== undefined;
@@ -15,13 +15,16 @@ const getAuthors= async (page: number, limit: number, sort: number, includes: st
     const hasLimit = limit !== undefined;
     const hasOffset = page !== undefined;
 
+    let orderByColumnName = sortBy === 'quote_count'? 'quote_count ' : 'author_name ';
+    let orderByType = sort === 1? 'DESC': 'ASC'
+
     let query = `
-    SELECT author_name, CAST(count(author_name) AS INT)
+    SELECT author_name, CAST(count(author_name) AS INT) AS quote_count
     FROM quotes
     JOIN authors ON quotes.author_id = authors.author_id
     ${hasFilter? 'WHERE author_name ~* ?' : ''}
     GROUP BY author_name
-    ${hasSort? 'ORDER BY author_name ' + (sort === 1? 'DESC': 'ASC')  : ''}
+    ${hasSort? 'ORDER BY ' + orderByColumnName + ' ' + orderByType  : ''}
     ${hasLimit? 'LIMIT ?': ''}
     ${hasOffset? 'OFFSET ?' : ''}
     `
@@ -33,7 +36,8 @@ const getAuthors= async (page: number, limit: number, sort: number, includes: st
         params.push(limit);
     }
     if(hasOffset){
-        params.push(page);
+        const lim = limit ?? 50;
+        params.push((page * lim));
     }
     query = replaceQueryPlaceholders(query, params)
     

@@ -6,7 +6,7 @@ export default function createRouter(db: any){
     const { getAuthors } = db;
     
     router.get('/authors', async (ctx) => {
-      let {sort, page, limit, includes } = helpers.getQuery(ctx);
+      let {sort, sortBy, page, limit, includes } = helpers.getQuery(ctx);
       let pageParam: number | undefined;
       let limitParam: number | undefined;
       let sortParam: number | undefined;
@@ -30,7 +30,7 @@ export default function createRouter(db: any){
       if( sort !== undefined){
           sortParam = parseInt(sort)
       }
-      const authors = await getAuthors(pageParam, limitParam, sortParam, includes);
+      const authors = await getAuthors(pageParam, limitParam, sortParam, sortBy, includes);
       ctx.response.body = authors;
     });
 

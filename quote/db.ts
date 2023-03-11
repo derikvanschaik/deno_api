@@ -37,7 +37,8 @@ const getQuotes = async (page: number, limit: number, includes: string) =>{
     }
     if(page !== undefined){
         query += ' OFFSET ?'
-        params.push(page)
+        const lim = limit ?? 50;
+        params.push((page * lim) );
     }
     query = replaceQueryPlaceholders(query, params)
 
