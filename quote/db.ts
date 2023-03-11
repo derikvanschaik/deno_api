@@ -1,45 +1,56 @@
-import {
-    ObjectId
-  } from "https://deno.land/x/mongo@v0.31.1/mod.ts";
 import connectToDB from "../db/connect.ts";
+import { replaceQueryPlaceholders } from "../utils.ts";
 
-
-// Defining schema 
-export interface QuoteSchema {
-    _id: ObjectId;
-    author: string;
-    quote: string;
-}
 // this database service
 export interface QuoteService {
-    getQuotes: (authorName: string, page: number, limit: number, includes: string) => Promise<any>;
+    getQuotesByAuthor: (authorName: string) => Promise<any>;
+    getQuotes: (page: number, limit: number, includes: string) => Promise<any>;
 }
-
-const getQuotes = async (authorName: string, page: number, limit: number, includes: string) =>{
+const getQuotesByAuthor = async (authorName: string) => {
     const client = await connectToDB();
-    const db = client.database("test");
-    const quotes = db.collection<QuoteSchema>("quotes");
-
-    const query = authorName !== undefined? { author: authorName} : {}
-    
-    let result;
-
-    if(includes !== undefined){
-        result = await quotes.find({...query,  quote : {'$regex' : includes, '$options' : 'i' }})
-    }else{
-        result = await quotes.find(query);
-
-    }
-    if(page !== undefined && limit !== undefined){
-        result.skip(page * limit);
-        result.limit(limit);
-    }
-    result = await result.toArray();
-    await client.close();
-    return result;
-
+    const query = `
+    SELECT 
+        author_name, quote 
+    FROM 
+        quotes 
+    JOIN 
+        authors on authors.author_id = quotes.author_id
+    WHERE author_name=$1
+    `
+    const result = await client.queryObject(query, [authorName])
+    await client.end();
+    return result.rows;
 }
 
-const service:QuoteService = { getQuotes }
+const getQuotes = async (page: number, limit: number, includes: string) =>{
+    const client = await connectToDB();
+
+    let query = 'SELECT author_name, quote FROM quotes JOIN authors on authors.author_id = quotes.author_id';
+    const params = [];
+    if(includes !== undefined){
+        query += " WHERE quote ~* ?"
+        params.push(includes);
+    }
+    if(limit !== undefined){
+        query += ' LIMIT ? '
+        params.push(limit)
+    }
+    if(page !== undefined){
+        query += ' OFFSET ?'
+        params.push(page)
+    }
+    query = replaceQueryPlaceholders(query, params)
+
+    let result: any;
+    if(params.length === 0){
+        result = await client.queryObject(query)
+    }else{
+        result = await client.queryObject(query, params)
+    }
+    await client.end()
+    return result.rows;
+}
+
+const service:QuoteService = { getQuotes, getQuotesByAuthor }
 export default service
 
